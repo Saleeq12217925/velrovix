@@ -22,10 +22,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Token expired or invalid — clear state and force login
-      localStorage.removeItem('velrovix_token');
-      localStorage.removeItem('velrovix_user');
-      window.location.href = '/login';
+      const url = error.config.url || '';
+      // Don't force redirect if the 401 is just a wrong password during login
+      if (!url.includes('/auth/login') && !url.includes('/auth/signup')) {
+        // Token expired or invalid — clear state and force login
+        localStorage.removeItem('velrovix_token');
+        localStorage.removeItem('velrovix_user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
