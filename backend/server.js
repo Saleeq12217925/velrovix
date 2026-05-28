@@ -9,6 +9,8 @@ import productRoutes from './routes/productRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import User from './models/User.js';
+import Product from './models/Product.js';
 
 // Load environmental variables
 dotenv.config();
@@ -70,6 +72,19 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
+
+app.post('/api/magic-seed', async (req, res) => {
+  try {
+    const { users, products } = req.body;
+    await User.deleteMany({});
+    await Product.deleteMany({});
+    if (users && users.length > 0) await User.insertMany(users);
+    if (products && products.length > 0) await Product.insertMany(products);
+    res.json({ success: true, message: 'Data seeded successfully to cloud!' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // Error boundary hooks
 app.use(notFound);
